@@ -1,0 +1,20 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.env
+.venv
+env/
+venv/
+
+# Large Data & Models (Don't push these!)
+data/raw/*
+data/processed/*
+models/*
+!*/.gitkeep
+
+# IDEs
+.vscode/
+.idea/
