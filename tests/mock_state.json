@@ -1,0 +1,15 @@
+{
+  "raw_text": "The latest economic bill is a disaster. It hands over market control to greedy corporations while ignoring the struggling working class. The regime has completely shattered the hope of the youth.",
+  "ideology_label": "Left",
+  "confidence": 0.89,
+  "evidence_sentences": [
+    "It hands over market control to greedy corporations while ignoring the struggling working class.",
+    "The regime has completely shattered the hope of the youth."
+  ],
+  "stances": {
+    "corporations": "Negative",
+    "working class": "Positive",
+    "regime": "Negative"
+  },
+  "frame": "Economy & Class Conflict"
+}
