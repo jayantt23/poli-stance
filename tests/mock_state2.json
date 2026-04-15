@@ -1,0 +1,16 @@
+{
+  "raw_text": "The administration's bold move to slash corporate red tape will finally unleash the free market. While leftist critics complain, the reality is that heavy regulations stifle innovation. Furthermore, securing the borders is a necessary step to protect national sovereignty.",
+  "ideology_label": "Right",
+  "confidence": 0.94,
+  "evidence_sentences": [
+    "The administration's bold move to slash corporate red tape will finally unleash the free market.",
+    "Furthermore, securing the borders is a necessary step to protect national sovereignty."
+  ],
+  "stances": {
+    "administration": "Positive",
+    "regulations": "Negative",
+    "leftist critics": "Negative",
+    "free market": "Positive"
+  },
+  "frame": "Economic Freedom & National Security"
+}

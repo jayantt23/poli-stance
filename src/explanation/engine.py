@@ -11,7 +11,7 @@ class ExplanationEngine:
         
         print(f"Loading local model from: {self.model_path}")
         
-        # Setup 4-bit Quantization
+        # Setup 4-bit Quantization (Note: If running locally without GPU, remove this and use device_map='cpu')
         quantization_config = BitsAndBytesConfig(
             load_in_4bit=True,
             bnb_4bit_compute_dtype=torch.float16,
@@ -32,17 +32,23 @@ class ExplanationEngine:
         """Constructs the exact instruction for the LLM based on team data."""
         system_prompt = (
             "You are an expert political discourse analyst. Your job is to explain WHY a news "
-            "article was classified as a specific ideology. Use the provided Evidence, Stances, "
-            "and Framing to write a concise, one-paragraph explanation (max 100 words). "
-            "Distinguish between sentiment toward a person/entity and the underlying ideological frame."
+            "article was classified as a specific ideology.\n\n"
+            "Return the output as a clean JSON object strictly with these exact keys:\n"
+            "- 'classification': The ideology label.\n"
+            "- 'base_reasoning': Explain how the Frame, Stances, and Evidence support the label.\n"
+            "- 'contrastive_reasoning': Explicitly state why the text does NOT align with the opposing ideology (or why it isn't an extreme if Center).\n"
+            "- 'confidence_note': Analyze the exact confidence score (if < 0.80, explicitly acknowledge the ambiguity or moderation in the text).\n"
+            "- 'rationale': A final 1-2 sentence summary combining the above.\n\n"
+            "Important Guidelines:\n"
+            "Disentanglement: Always distinguish between sentiment toward a person/entity and the underlying policy frame."
         )
         
         user_prompt = (
             f"Ideology Classification: {state['ideology_label']} (Confidence: {state['confidence']})\n"
             f"Dominant Frame: {state['frame']}\n"
             f"Entity Stances: {json.dumps(state['stances'])}\n"
-            f"Top Evidence Sentences:\n- " + "\n- ".join(state['evidence_sentences']) + "\n\n"
-            "Based on the data above, provide the JSON output containing a 'rationale' string explaining this classification."
+            f"Top Evidence:\n- " + "\n- ".join(state['evidence_sentences']) + "\n\n"
+            "Provide the JSON output."
         )
 
         # Use Qwen's specific chat template
@@ -64,8 +70,8 @@ class ExplanationEngine:
         with torch.no_grad():
             outputs = self.model.generate(
                 **inputs,
-                max_new_tokens=150,
-                temperature=0.3, # Low temperature for analytical consistency
+                max_new_tokens=512,
+                temperature=0.3,     # Low temperature for analytical consistency
                 do_sample=True
             )
         

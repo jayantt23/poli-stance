@@ -1,0 +1,16 @@
+{
+  "raw_text": "The new infrastructure bill passed with significant bipartisan compromises. While it doesn't offer the sweeping climate reforms some activists wanted, it provides essential funding for repairing bridges and roads without drastically raising taxes on the middle class.",
+  "ideology_label": "Center",
+  "confidence": 0.78,
+  "evidence_sentences": [
+    "The new infrastructure bill passed with significant bipartisan compromises.",
+    "While it doesn't offer the sweeping climate reforms some activists wanted, it provides essential funding for repairing bridges and roads..."
+  ],
+  "stances": {
+    "infrastructure bill": "Positive",
+    "bipartisan compromises": "Positive",
+    "activists": "Neutral",
+    "taxes": "Negative"
+  },
+  "frame": "Infrastructure & Bipartisanship"
+}

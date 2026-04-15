@@ -1,0 +1,15 @@
+{
+  "raw_text": "Gandhi's relentless push for expanded state welfare is economically illiterate. While the opposition leader claims to speak for the poor, these massive subsidy schemes will only balloon the national deficit and deter private investment necessary for true national growth.",
+  "ideology_label": "Right",
+  "confidence": 0.88,
+  "evidence_sentences": [
+    "Gandhi's relentless push for expanded state welfare is economically illiterate.",
+    "...these massive subsidy schemes will only balloon the national deficit and deter private investment necessary for true national growth."
+  ],
+  "stances": {
+    "Gandhi": "Negative",
+    "state welfare": "Negative",
+    "private investment": "Positive"
+  },
+  "frame": "Economic Development vs. Subsidies"
+}

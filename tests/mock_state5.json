@@ -1,0 +1,15 @@
+{
+  "raw_text": "Fossil fuel conglomerates have evaded accountability for decades, actively destroying marginalized communities. The proposed green tax is a long overdue measure to redistribute wealth and fund community-led climate resilience initiatives.",
+  "ideology_label": "Left",
+  "confidence": 0.91,
+  "evidence_sentences": [
+    "Fossil fuel conglomerates have evaded accountability for decades, actively destroying marginalized communities.",
+    "The proposed green tax is a long overdue measure to redistribute wealth and fund community-led climate resilience initiatives."
+  ],
+  "stances": {
+    "fossil fuel conglomerates": "Negative",
+    "green tax": "Positive",
+    "marginalized communities": "Positive"
+  },
+  "frame": "Environmental Justice & Wealth Redistribution"
+}
