@@ -3,7 +3,7 @@
 Under `src/stance/`:
 
 - `registry.py`
-  - Stores the political target registry.
+  - Stores the political target registry(currently it is just a mock, need to make a more updated list).
   - Maps canonical targets to aliases and related entities.
   - Used for alias resolution such as `Modi -> Narendra Modi`, `Didi -> Mamata Banerjee`.
 
