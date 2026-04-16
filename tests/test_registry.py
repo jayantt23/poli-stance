@@ -2,6 +2,7 @@
 
 from stance.registry import (
     MOCK_TARGET_REGISTRY,
+    TARGET_REGISTRY,
     get_aliases,
     get_related,
     resolve_target,
@@ -14,7 +15,11 @@ def test_resolve_target_exact_canonical():
 
 def test_resolve_target_alias():
     assert resolve_target("Modi", MOCK_TARGET_REGISTRY) == "Narendra Modi"
-    assert resolve_target("PM Modi", MOCK_TARGET_REGISTRY) == "Narendra Modi"
+    # CORRECT – the canonical key is what gets returned
+    assert resolve_target("YSR Congress", TARGET_REGISTRY) == "YSR Congress"
+
+    # CORRECT – an alias resolves to the canonical key
+    assert resolve_target("Jagan party", TARGET_REGISTRY) == "YSR Congress"
     assert resolve_target("Didi", MOCK_TARGET_REGISTRY) == "Mamata Banerjee"
     assert resolve_target("GOP", MOCK_TARGET_REGISTRY) == "Republican Party"
 

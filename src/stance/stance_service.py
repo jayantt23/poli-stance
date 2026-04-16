@@ -33,8 +33,10 @@ def _build_retrieval_names(
         get_aliases(registry or {}, canonical) if registry is not None else [canonical]
     )
 
+    # use strict only! related not available for TARGET_REGISTRY, only the mock, and related is making things somewhat off, like conflating BJP with MODI
     if retrieval_mode == "strict":
         names = aliases
+
     elif retrieval_mode == "expanded":
         related_names = []
         if registry is not None:
