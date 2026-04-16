@@ -3,9 +3,7 @@ from __future__ import annotations
 import json
 from typing import Any, Dict, List, Optional
 
-# Minimal mock registry. Replace/extend this with your researched registry.
 MOCK_TARGET_REGISTRY: Dict[str, Dict[str, Any]] = {
-    # India
     "Narendra Modi": {
         "aliases": ["Narendra Modi", "Modi", "PM Modi", "Prime Minister Modi"],
         "related": ["BJP"],
@@ -154,7 +152,7 @@ MOCK_TARGET_REGISTRY: Dict[str, Dict[str, Any]] = {
 }
 
 TARGET_REGISTRY = {
-    # INDIA – PEOPLE
+    # India - people
     "Narendra Modi": {
         "aliases": [
             "Narendra Modi",
