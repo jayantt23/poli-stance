@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional
 import spacy
 from transformers import pipeline
 
-from .registry import MOCK_TARGET_REGISTRY, get_aliases, get_related, resolve_target
+from .registry import MOCK_TARGET_REGISTRY, TARGET_REGISTRY, get_aliases, get_related, resolve_target
 from .target_extraction import sentence_mentions_any, split_sentences, suggest_targets
 
 
@@ -196,8 +196,8 @@ def run_stance_pipeline(
       - results_for_extra_entities
       - all_results
     """
-    if registry is None and use_mock_registry:
-        registry = MOCK_TARGET_REGISTRY
+    if registry is None:
+        registry = MOCK_TARGET_REGISTRY if use_mock_registry else TARGET_REGISTRY
 
     requested_targets = targets[:] if targets is not None else []
 
