@@ -4,14 +4,11 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
 class ExplanationEngine:
-    def __init__(self):
-        # This goes up two levels from src/explanation/engine.py to the root, then into models/explanation
-        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        self.model_path = os.path.join(base_dir, "models", "explanation")
+    def __init__(self, model_id="Qwen/Qwen2.5-3B-Instruct"):
+        self.model_id = model_id
+        print(f"Loading Explanation Model from Hugging Face: {self.model_id}...")
         
-        print(f"Loading local model from: {self.model_path}")
-        
-        # Setup 4-bit Quantization (Note: If running locally without GPU, remove this and use device_map='cpu')
+        # Setup 4-bit Quantization for GPU efficiency
         quantization_config = BitsAndBytesConfig(
             load_in_4bit=True,
             bnb_4bit_compute_dtype=torch.float16,
@@ -19,10 +16,10 @@ class ExplanationEngine:
             bnb_4bit_quant_type="nf4"
         )
         
-        # Load from the local directory instead of the Hugging Face hub
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
+        # Load directly from the Hugging Face hub
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_id)
         self.model = AutoModelForCausalLM.from_pretrained(
-            self.model_path,
+            self.model_id,
             device_map="auto",
             quantization_config=quantization_config
         )
@@ -82,12 +79,15 @@ class ExplanationEngine:
         return response
 
 if __name__ == "__main__":
-    import os
-    
-    mock_path = os.path.join(os.path.dirname(__file__), "..", "..", "tests", "mock_state.json")
-    
-    with open(mock_path, "r") as f:
-        mock_data = json.load(f)
+    # Test block
+    mock_data = {
+        "raw_text": "The new infrastructure bill passed with significant bipartisan compromises.",
+        "ideology_label": "Center",
+        "confidence": 0.78,
+        "evidence_sentences": ["The new infrastructure bill passed with significant bipartisan compromises."],
+        "stances": {"infrastructure bill": "Positive"},
+        "frame": "Infrastructure & Bipartisanship"
+    }
         
     engine = ExplanationEngine()
     result = engine.generate_rationale(mock_data)
