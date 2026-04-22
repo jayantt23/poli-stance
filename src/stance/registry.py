@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from typing import Any, Dict, List, Optional
 
-MOCK_TARGET_REGISTRY: Dict[str, Dict[str, Any]] = {
+TARGET_REGISTRY: Dict[str, Dict[str, Any]] = {
     "Narendra Modi": {
         "aliases": ["Narendra Modi", "Modi", "PM Modi", "Prime Minister Modi"],
         "related": ["BJP"],
