@@ -55,7 +55,7 @@ article_input = st.text_area(
 )
 
 # =========================
-# TARGET SELECTION (NEW FEATURE)
+# TARGET SELECTION
 # =========================
 st.subheader("2. What do you want to analyze?")
 
@@ -102,7 +102,7 @@ if analyze_button and article_input.strip():
         frame, frame_conf = framer.analyze(article_input)
 
         # -------------------------
-        # Stance Pipeline (UPDATED)
+        # Stance Pipeline
         # -------------------------
         stance_output = run_stance_pipeline(
             text=article_input,
@@ -115,7 +115,7 @@ if analyze_button and article_input.strip():
         )
 
         # -------------------------
-        # Simplified stance view (for explanation engine)
+        # Simplified stance view
         # -------------------------
         simplified_stances = {
             res["target"]: res["label"]
@@ -156,11 +156,33 @@ if analyze_button and article_input.strip():
         st.markdown("#### Source Text")
         st.info(article_input)
 
+        # =========================
+        # REQUESTED TARGETS (CLEAN)
+        # =========================
         st.markdown("###  Requested Targets")
-        st.json(stance_output["results_for_requested_targets"])
 
-        st.markdown("###  Auto-detected Targets")
-        st.json(stance_output["results_for_extra_entities"])
+        requested = stance_output["results_for_requested_targets"]
+
+        if not requested:
+            st.info("No requested targets provided or no evidence found.")
+        else:
+            for res in requested:
+                if res["label"] == "no_evidence":
+                    continue
+
+                with st.expander(f"{res['target']} → {res['label']}"):
+                    st.write("**Scores:**", res["scores"])
+                    st.write("**Evidence:**")
+                    for e in res["evidence"]:
+                        st.write(f"- {e}")
+
+        # =========================
+        # FULL JSON OUTPUT
+        # =========================
+        st.markdown("###  Full Pipeline Output")
+
+        with st.expander("View raw JSON output"):
+            st.json(stance_output)
 
     with col2:
         st.markdown("#### Final Classification")
@@ -185,3 +207,4 @@ if analyze_button and article_input.strip():
 
             st.markdown("**Confidence Calibration**")
             st.write(result.get('confidence_note', 'N/A'))
+
