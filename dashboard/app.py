@@ -67,7 +67,7 @@ mode = st.radio(
 
 custom_targets_input = st.text_input(
     "Enter targets (comma-separated):",
-    placeholder="e.g. Modi, Rahul Gandhi, GST"
+    placeholder="e.g. Trump, Harris, Biden, Gun violence.."
 )
 
 st.caption("Tip: Leave blank for auto-detection, or specify targets for focused analysis.")
