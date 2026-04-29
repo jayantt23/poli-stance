@@ -2,7 +2,6 @@ import streamlit as st
 import json
 import sys
 import os
-import streamlit.components.v1 as components
 
 # Ensure Python can find your 'src' folder
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -72,46 +71,9 @@ custom_targets_input = st.text_input(
 
 st.caption("Tip: Leave blank for auto-detection, or specify targets for focused analysis.")
 
-# =========================
-# SHAP TOGGLE
-# =========================
-show_shap = st.checkbox(
-    "🎨 Show SHAP token-level attribution (slower, requires shap installed)",
-    value=False
-)
-
 analyze_button = st.button("Run poli-stance Pipeline 🚀", type="primary")
 
 st.divider()
-
-
-# =========================
-# HELPER: SHAP HTML
-# =========================
-def get_shap_html(text, ideology_result):
-    """
-    Generates SHAP token-level attribution HTML for the predicted label.
-    Returns raw HTML string or None on failure.
-    """
-    try:
-        import shap
-
-        predicted_label = ideology_result["ideology_label"]
-        pipeline = ideology_result["pipeline"]
-
-        # Map label → index
-        label2id = {v: k for k, v in pipeline.model.config.id2label.items()}
-        target_idx = label2id.get(predicted_label, 0)
-
-        explainer_shap = shap.Explainer(pipeline)
-        shap_values = explainer_shap([text])
-
-        # display=False returns the HTML string instead of rendering inline
-        html = shap.plots.text(shap_values[0, :, target_idx], display=False)
-        return html
-
-    except Exception as e:
-        return None, str(e)
 
 
 # =========================
@@ -136,7 +98,7 @@ if analyze_button and article_input.strip():
         ideo_result = ideology_model.predict(article_input)
 
         evidence = evidence_model.get_top_k_sentences(
-            article_input, ideo_result, top_k=2
+            article_input, ideo_result, top_k=5
         )
 
         frame, frame_conf = framer.analyze(article_input)
@@ -188,18 +150,6 @@ if analyze_button and article_input.strip():
             st.write(raw_output)
             st.stop()
 
-        # -------------------------
-        # SHAP (optional, computed inside spinner)
-        # -------------------------
-        shap_html = None
-        shap_error = None
-        if show_shap:
-            shap_result = get_shap_html(article_input, ideo_result)
-            if isinstance(shap_result, tuple):
-                shap_html, shap_error = shap_result
-            else:
-                shap_html = shap_result
-
         # =========================
         # FINAL PIPELINE OUTPUT
         # =========================
@@ -238,7 +188,6 @@ if analyze_button and article_input.strip():
         )
 
         if evidence:
-            # Pick border colour based on classification
             label = ideo_result["ideology_label"]
             border_color = (
                 "#e63946" if label == "Right"
@@ -326,30 +275,6 @@ if analyze_button and article_input.strip():
             st.write(result.get("confidence_note", "N/A"))
 
         # -------------------------
-        # SHAP TOKEN ATTRIBUTION
-        # -------------------------
-        if show_shap:
-            st.markdown("#### 🎨 SHAP Token Attribution")
-            st.caption(
-                "Each word is highlighted by how much it pushes the model toward "
-                f"**{ideo_result['ideology_label']}**. "
-                "🔴 = pushes toward predicted label, 🔵 = pushes away."
-            )
-
-            if shap_html:
-                # MUST use components.html — st.markdown strips SHAP's inline JS/CSS
-                components.html(shap_html, height=280, scrolling=True)
-            elif shap_error:
-                st.warning(f"SHAP failed to render: {shap_error}")
-            else:
-                st.info("SHAP output was empty.")
-        else:
-            st.caption(
-                "💡 Enable **Show SHAP token-level attribution** above to see "
-                "word-level explanations for this classification."
-            )
-
-        # -------------------------
         # CONFIDENCE BREAKDOWN
         # -------------------------
         st.markdown("#### 📊 Confidence Breakdown")
@@ -370,34 +295,9 @@ if analyze_button and article_input.strip():
                         </div>
                         <div style="background:#e0e0e0; border-radius:4px; height:10px;">
                             <div style="width:{pct}%; background:{bar_color};
-                                        height:10px; border-radius:4px;
-                                        transition: width 0.5s ease;"></div>
+                                        height:10px; border-radius:4px;"></div>
                         </div>
                     </div>
                     """,
                     unsafe_allow_html=True
                 )
-
-        # -------------------------
-        # FRAMING LABEL
-        # -------------------------
-        st.markdown("#### 🖼️ Detected Frame")
-        st.markdown(
-            f"""
-            <div style="
-                display:inline-block;
-                background: rgba(108,117,125,0.12);
-                border: 1px solid #adb5bd;
-                border-radius: 20px;
-                padding: 6px 16px;
-                font-size: 0.95em;
-                font-weight: 600;
-            ">
-                {frame} &nbsp;
-                <span style="color:#6c757d; font-weight:400;">
-                    ({frame_conf:.0%} confidence)
-                </span>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
