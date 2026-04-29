@@ -156,10 +156,10 @@ if analyze_button and article_input.strip():
         st.markdown("#### Source Text")
         st.info(article_input)
 
-        st.markdown("### 🎯 Requested Targets")
+        st.markdown("###  Requested Targets")
         st.json(stance_output["results_for_requested_targets"])
 
-        st.markdown("### 🔍 Auto-detected Targets")
+        st.markdown("###  Auto-detected Targets")
         st.json(stance_output["results_for_extra_entities"])
 
     with col2:
