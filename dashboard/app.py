@@ -76,6 +76,7 @@ analyze_button = st.button("Run poli-stance Pipeline 🚀", type="primary")
 
 st.divider()
 
+
 # =========================
 # OUTPUT
 # =========================
@@ -96,9 +97,11 @@ if analyze_button and article_input.strip():
         # Ideology + Evidence + Frame
         # -------------------------
         ideo_result = ideology_model.predict(article_input)
+
         evidence = evidence_model.get_top_k_sentences(
             article_input, ideo_result, top_k=2
         )
+
         frame, frame_conf = framer.analyze(article_input)
 
         # -------------------------
@@ -123,6 +126,9 @@ if analyze_button and article_input.strip():
             if res["label"] != "no_evidence"
         }
 
+        # -------------------------
+        # Build state (intermediate)
+        # -------------------------
         state = {
             "raw_text": article_input,
             "ideology_label": ideo_result['ideology_label'],
@@ -145,6 +151,24 @@ if analyze_button and article_input.strip():
             st.write(raw_output)
             st.stop()
 
+        # =========================
+        # FINAL PIPELINE OUTPUT (FIXED)
+        # =========================
+        final_output = {
+            "input_text": article_input,
+
+            "ideology": ideo_result,
+
+            "framing": {
+                "label": frame,
+                "confidence": frame_conf
+            },
+
+            "stance": stance_output,
+
+            "explanation": result
+        }
+
     # =========================
     # DISPLAY RESULTS
     # =========================
@@ -157,9 +181,9 @@ if analyze_button and article_input.strip():
         st.info(article_input)
 
         # =========================
-        # REQUESTED TARGETS (CLEAN)
+        # REQUESTED TARGETS
         # =========================
-        st.markdown("###  Requested Targets")
+        st.markdown("### 🎯 Requested Targets")
 
         requested = stance_output["results_for_requested_targets"]
 
@@ -177,12 +201,12 @@ if analyze_button and article_input.strip():
                         st.write(f"- {e}")
 
         # =========================
-        # FULL JSON OUTPUT
+        # FULL FINAL JSON OUTPUT
         # =========================
-        st.markdown("###  Full Pipeline Output")
+        st.markdown("###  Full System Output")
 
-        with st.expander("View raw JSON output"):
-            st.json(stance_output)
+        with st.expander("View full pipeline JSON"):
+            st.json(final_output)
 
     with col2:
         st.markdown("#### Final Classification")
