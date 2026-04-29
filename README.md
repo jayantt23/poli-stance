@@ -3,7 +3,7 @@
 Under `src/stance/`:
 
 - `registry.py`
-  - Stores the political target registry(currently it is just a mock, need to make a more updated list).
+  - Stores the political target registry (currently it is just a mock, needs to be expanded).
   - Maps canonical targets to aliases and related entities.
   - Used for alias resolution such as `Modi -> Narendra Modi`, `Didi -> Mamata Banerjee`.
 
@@ -25,41 +25,84 @@ Under `src/stance/`:
 
 The current pipeline supports:
 
-- input text
-- optional user-provided target list
-- optional automatic target generation using NER + registry issue keywords
-- registry-backed alias matching
-- strict vs expanded retrieval
-- per-target stance scoring with evidence extraction
+- input text  
+- optional user-provided target list  
+- optional automatic target generation using NER + registry issue keywords  
+- registry-backed alias matching  
+- strict vs expanded retrieval  
+- per-target stance scoring with evidence extraction  
 
 The stance model is currently used in a zero-shot NLI setup:
 
-- premise = sentence/text chunk
-- hypotheses = support / oppose / neutral with respect to a target
+- premise = sentence/text chunk  
+- hypotheses = support / oppose / neutral with respect to a target  
 
 ## Output Format
 
 The main API returns a JSON-serializable dictionary with:
 
-- `requested_targets`
-- `resolved_requested_targets`
-- `extra_entities`
-- `results_for_requested_targets`
-- `results_for_extra_entities`
-- `all_results`
+- `requested_targets`  
+- `resolved_requested_targets`  
+- `extra_entities`  
+- `results_for_requested_targets`  
+- `results_for_extra_entities`  
+- `all_results`  
 
 Each target result contains:
 
-- `target`
-- `label`
-- `scores`
-- `evidence`
-- `num_sentences_used`
+- `target`  
+- `label`  
+- `scores`  
+- `evidence`  
+- `num_sentences_used`  
 
-### Running Tests
+---
 
-To run the current unit tests(no tests for loading model and testing it here, given that was developed in Kaggle):
+## Framing
+
+Under `src/framing/`:
+
+- `analyzer.py`
+  - Implements the framing analysis component.
+  - Uses a transformer-based model to classify the dominant narrative frame in the input text.
+  - Identifies how the issue is being presented (e.g., economic, governance, conflict, social justice).
+  - Outputs both the predicted frame label and a confidence score.
+
+## Framing Pipeline
+
+The framing module supports:
+
+- input text (article, paragraph, or statement)  
+- transformer-based inference for frame classification  
+- integration with ideology and stance components  
+
+Unlike stance detection, framing focuses on **how an issue is presented**, not the position taken toward a specific target.
+
+## Output Format (Framing)
+
+The framing module returns:
+
+- `frame`: predicted dominant frame label  
+- `confidence`: confidence score  
+
+This output is used downstream by the explanation engine to improve interpretability and reasoning.
+
+---
+
+## Notes
+
+- Stance and framing capture different aspects of political text:
+
+  - **Stance** → position toward a target  
+  - **Framing** → how the issue is structured or contextualized  
+
+- Framing helps explain *why* a piece of text may appear left/right/center, especially when stance is mixed or ambiguous.
+
+---
+
+## Running Tests
+
+To run the current unit tests (no tests for model loading or inference, since those were developed in Kaggle):
 
 ```bash
 pytest -q tests/test_registry.py tests/test_target_extraction.py
-```
