@@ -1,3 +1,4 @@
+
 import streamlit as st
 import json
 import sys
@@ -15,8 +16,9 @@ from src.stance.stance_service import run_stance_pipeline
 
 st.set_page_config(page_title="poli-stance", page_icon="🏛️", layout="wide")
 
-# --- CACHE THE MODELS ---
-# This ensures the 6GB Qwen model and RoBERTa don't reload on every button click!
+# =========================
+# LOAD MODELS (CACHED)
+# =========================
 @st.cache_resource
 def load_all_models():
     explainer = ExplanationEngine()
@@ -30,46 +32,111 @@ def load_all_models():
 with st.spinner("Loading AI Models into GPU... (This takes 2-3 minutes)"):
     explainer, ideology_model, evidence_model, framer, nlp, stance_clf = load_all_models()
 
-# --- UI HEADER ---
+# =========================
+# UI HEADER
+# =========================
 st.title("🏛️ poli-stance")
 st.markdown("**Explainable Political Ideology & Framing Analysis**")
 st.divider()
 
-# --- INPUT SECTION ---
+# =========================
+# INPUT TEXT
+# =========================
 st.subheader("1. Input Article")
-default_text = "The administration unveiled its new economic plan today. Critics argue that the tax cuts disproportionately benefit large corporations while neglecting the working class. Supporters say the plan will spur job creation."
-article_input = st.text_area("Paste the news article here:", value=default_text, height=150)
+
+default_text = """The administration unveiled its new economic plan today. 
+Critics argue that the tax cuts disproportionately benefit large corporations 
+while neglecting the working class. Supporters say the plan will spur job creation."""
+
+article_input = st.text_area(
+    "Paste the news article here:",
+    value=default_text,
+    height=150
+)
+
+# =========================
+# TARGET SELECTION (NEW FEATURE)
+# =========================
+st.subheader("2. What do you want to analyze?")
+
+mode = st.radio(
+    "Target selection mode:",
+    ["Auto-detect targets", "Custom targets", "Both"],
+    horizontal=True
+)
+
+custom_targets_input = st.text_input(
+    "Enter targets (comma-separated):",
+    placeholder="e.g. Modi, Rahul Gandhi, GST"
+)
+
+st.caption("Tip: Leave blank for auto-detection, or specify targets for focused analysis.")
+
 analyze_button = st.button("Run poli-stance Pipeline 🚀", type="primary")
 
 st.divider()
 
-# --- OUTPUT SECTION ---
+# =========================
+# OUTPUT
+# =========================
 if analyze_button and article_input.strip():
-    with st.spinner('Running Preprocessing, Ideology Prediction, and Explanation Engine...'):
-        
-        # 1. Pipeline Execution
+
+    with st.spinner('Running full pipeline...'):
+
+        # -------------------------
+        # Parse user targets
+        # -------------------------
+        user_targets = None
+        if mode in ["Custom targets", "Both"] and custom_targets_input.strip():
+            user_targets = [
+                t.strip() for t in custom_targets_input.split(",") if t.strip()
+            ]
+
+        # -------------------------
+        # Ideology + Evidence + Frame
+        # -------------------------
         ideo_result = ideology_model.predict(article_input)
-        evidence = evidence_model.get_top_k_sentences(article_input, ideo_result, top_k=2)
-        frame, frame_conf = framer.analyze(article_input)
-        
-        stance_output = run_stance_pipeline(
-            text=article_input, clf=stance_clf, nlp=nlp,
-            use_mock_registry=True, do_ner_target_suggestion=True, retrieval_mode="strict"
+        evidence = evidence_model.get_top_k_sentences(
+            article_input, ideo_result, top_k=2
         )
-        
-        simplified_stances = {res["target"]: res["label"] for res in stance_output["all_results"] if res["label"] != "no_evidence"}
+        frame, frame_conf = framer.analyze(article_input)
+
+        # -------------------------
+        # Stance Pipeline (UPDATED)
+        # -------------------------
+        stance_output = run_stance_pipeline(
+            text=article_input,
+            clf=stance_clf,
+            nlp=nlp,
+            targets=user_targets,
+            use_mock_registry=True,
+            do_ner_target_suggestion=(mode != "Custom targets"),
+            retrieval_mode="strict"
+        )
+
+        # -------------------------
+        # Simplified stance view (for explanation engine)
+        # -------------------------
+        simplified_stances = {
+            res["target"]: res["label"]
+            for res in stance_output["all_results"]
+            if res["label"] != "no_evidence"
+        }
 
         state = {
             "raw_text": article_input,
             "ideology_label": ideo_result['ideology_label'],
             "confidence": ideo_result['confidence'],
             "evidence_sentences": evidence,
-            "stances": simplified_stances, 
+            "stances": simplified_stances,
             "frame": frame
         }
-        
-        # 2. Generate Rationale
+
+        # -------------------------
+        # Explanation Engine
+        # -------------------------
         raw_output = explainer.generate_rationale(state)
+
         try:
             clean_json_str = raw_output.replace("```json", "").replace("```", "").strip()
             result = json.loads(clean_json_str)
@@ -77,30 +144,44 @@ if analyze_button and article_input.strip():
             st.error("Failed to parse LLM Output. Raw text:")
             st.write(raw_output)
             st.stop()
-            
-    st.subheader("2. Analysis Results")
+
+    # =========================
+    # DISPLAY RESULTS
+    # =========================
+    st.subheader("3. Analysis Results")
+
     col1, col2 = st.columns([1, 1.2])
-    
+
     with col1:
         st.markdown("#### Source Text")
         st.info(article_input)
-        st.markdown("**Detected Entity Stances:**")
-        st.json(simplified_stances)
-        
+
+        st.markdown("### 🎯 Requested Targets")
+        st.json(stance_output["results_for_requested_targets"])
+
+        st.markdown("### 🔍 Auto-detected Targets")
+        st.json(stance_output["results_for_extra_entities"])
+
     with col2:
         st.markdown("#### Final Classification")
+
         color = "gray"
-        if result["classification"] == "Left": color = "blue"
-        elif result["classification"] == "Right": color = "red"
-        elif result["classification"] == "Center": color = "violet"
+        if result["classification"] == "Left":
+            color = "blue"
+        elif result["classification"] == "Right":
+            color = "red"
+        elif result["classification"] == "Center":
+            color = "violet"
 
         st.markdown(f"### :{color}[{result['classification']}]")
         st.write(f"**Rationale:** {result.get('rationale', 'N/A')}")
-        
-        with st.expander("🔍 View Explanation Engine Reasoning (Under the Hood)"):
+
+        with st.expander("🔍 View Explanation Engine Reasoning"):
             st.markdown("**Base Reasoning**")
             st.write(result.get('base_reasoning', 'N/A'))
+
             st.markdown("**Contrastive Logic**")
             st.write(result.get('contrastive_reasoning', 'N/A'))
+
             st.markdown("**Confidence Calibration**")
             st.write(result.get('confidence_note', 'N/A'))
