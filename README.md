@@ -100,6 +100,35 @@ This output is used downstream by the explanation engine to improve interpretabi
 
 ---
 
+## Explanation Engine
+
+**Location:** `src/explanation/engine.py`
+
+The Explanation Engine acts as the final synthesis layer for the entire Poli-Stance pipeline. Unlike the upstream predictive modules that classify raw text, this module functions as a reasoning engine. It translates the discrete outputs of the classification pipeline into a coherent, academically rigorous, and human-readable justification.
+
+### Core Features
+
+* `Generative AI Integration:` Loads a generative Large Language Model (`Qwen/Qwen2.5-3B-Instruct`) from Hugging Face, utilizing 4-bit NF4 quantization for maximum VRAM efficiency.
+* `State Contract Assembly:` Takes the aggregated "State Contract" (ideology, confidence, evidence, stances, and frame) from upstream modules and builds a strict Chain-of-Thought prompt.
+* `Ideological Disentanglement:` Enforces strict logical boundaries, ensuring the model separates sentiment directed toward specific entities from the underlying policy frames.
+* `Zero-Shot Prompting:` Utilizes zero-shot instruction prompting to force grounded, analytical reasoning.
+* `Structured Output:` Generates strict JSON responses to prevent LLM hallucination and ensure seamless compatibility with the frontend dashboard.
+
+### Output Format
+
+The module returns a parsed JSON dictionary containing the following rationale breakdown:
+
+```json
+{
+  "classification": "The final predicted ideology label.",
+  "base_reasoning": "An explanation of how the detected frame, target stances, and extracted evidence mathematically support the classification.",
+  "contrastive_reasoning": "An explicit logical statement detailing why the text does NOT align with the opposing ideology (or why it rejects extremes, if Center).",
+  "confidence_note": "An analysis of the classifier's confidence score, specifically highlighting ambiguity or moderation if the score is below 0.80.",
+  "rationale": "A concise 1-2 sentence executive summary synthesizing the above logic for the end-user."
+}
+```
+
+
 ## Running Tests
 
 To run the current unit tests (no tests for model loading or inference, since those were developed in Kaggle):
