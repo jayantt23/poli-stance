@@ -111,7 +111,7 @@ if analyze_button and article_input.strip():
             clf=stance_clf,
             nlp=nlp,
             targets=user_targets,
-            use_mock_registry=True,
+            # use_mock_registry=True,
             do_ner_target_suggestion=(mode != "Custom targets"),
             retrieval_mode="strict"
         )
