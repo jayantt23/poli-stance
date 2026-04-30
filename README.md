@@ -2,12 +2,12 @@
 
 Under `notebooks` and `src/ideology/`:
 
-- `roberta_ideology_predictor.ipynb`
+`roberta_ideology_predictor.ipynb`
 - Contains the fine-tuning pipeline for the ideology classification model  
 - Uses a transformer-based architecture (RoBERTa)  
 - Handles preprocessing, tokenization, training, and evaluation  
 
-- `predictor.py`
+`predictor.py`
 - Provides the `IdeologyPredictor` class for inference  
 - Loads the fine-tuned model from Hugging Face  
 - Exposes a simple `predict(text)` API  
