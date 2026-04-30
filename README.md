@@ -1,3 +1,41 @@
+## Ideology Predictor  
+
+Under `src/ideology/`:
+
+### roberta_ideology_predictor.ipynb
+- Contains the fine-tuning pipeline for the ideology classification model  
+- Uses a transformer-based architecture (RoBERTa)  
+- Handles preprocessing, tokenization, training, and evaluation  
+
+### predictor.py
+- Provides the `IdeologyPredictor` class for inference  
+- Loads the fine-tuned model from Hugging Face  
+- Exposes a simple `predict(text)` API  
+
+## Current Pipeline  
+
+The ideology predictor supports:
+
+- input text (sentence / paragraph / article)  
+- classification into:
+  - Left  
+  - Center  
+  - Right  
+- probability distribution over all classes  
+- confidence score for the predicted label  
+- reusable pipeline object (used by Evidence Extractor)
+
+The fine-tuned model has also been hosted on [HuggingFace](https://huggingface.co/vriddhi-07/ideology_predictor_roberta).
+
+## Output Format  
+
+The predictor returns a JSON-like dictionary with:
+
+- `ideology_label` – predicted class (Left / Center / Right)  
+- `confidence` – score of predicted class  
+- `probs_full` – probability distribution over all classes  
+- `pipeline` – classifier object (used for downstream tasks)  
+
 ## Stance
 
 Under `src/stance/`:
